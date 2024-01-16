@@ -1,43 +1,107 @@
-import CartContext from '../../context/CartContext'
-
 import Header from '../Header'
-import EmptyCartView from '../EmptyCartView'
-import CartListView from '../CartListView'
-import CartSummary from '../CartSummary'
-
+import CartContext from '../../context/CartContext'
 import './index.css'
 
-const Cart = () => (
+const Cart = props => (
   <CartContext.Consumer>
-    {value => {
-      const {cartList, removeAllCartItems} = value
-      const showEmptyView = cartList.length === 0
-      const onClickRemoveAllBtn = () => {
+    {countValue => {
+      const {
+        cartList,
+        decrementCartItemQuantity,
+        incrementCartItemQuantity,
+        removeCartItem,
+        removeAllCartItems,
+      } = countValue
+
+      const {location} = props
+      const {state} = location
+      const cartLength = cartList.length
+
+      const onDecrement = id => {
+        decrementCartItemQuantity(id)
+      }
+
+      const onIncrement = id => {
+        incrementCartItemQuantity(id)
+      }
+      const onRemoveSeparate = id => {
+        removeCartItem(id)
+      }
+
+      const removeAllCart = () => {
         removeAllCartItems()
       }
-      const restaurantName = 'UNI Resto Cafe'
 
-      return (
-        <>
-          <Header restaurantName={restaurantName} />
-          <div className="cart-container">
-            {showEmptyView ? (
-              <EmptyCartView />
-            ) : (
-              <div className="cart-content-container">
-                <h1 className="cart-heading">My Cart</h1>
+      const renderCartListView = () => (
+        <div className="mainCartContainer">
+          <button
+            type="button"
+            className="removeButton"
+            onClick={removeAllCart}
+          >
+            Remove All
+          </button>
+          <ul className="unOrderList">
+            {cartList.map(each => (
+              <li className="listItem" key={each.dishId}>
+                <div className="detailsList">
+                  <img
+                    src={each.dishImage}
+                    alt={each.dishName}
+                    className="dishImage"
+                  />
+                  <div className="detailsDiv">
+                    <p className="dishName">{each.dishName}</p>
+                  </div>
+                </div>
+                <div className="quantityAdjst">
+                  <button
+                    type="button"
+                    className="buttonOperation"
+                    onClick={() => onDecrement(each.dishId)}
+                  >
+                    -
+                  </button>
+                  <p className="quantity">{each.dishQuantity}</p>
+                  <button
+                    type="button"
+                    className="buttonOperation"
+                    onClick={() => onIncrement(each.dishId)}
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="priceContainer">
+                  <p>SAR {each.dishQuantity * each.dishPrice} -/</p>
+                </div>
                 <button
                   type="button"
-                  className="remove-all-btn"
-                  onClick={onClickRemoveAllBtn}
+                  className="removeButton"
+                  onClick={() => onRemoveSeparate(each.dishId)}
                 >
                   Remove All
                 </button>
-                <CartListView />
-                <CartSummary />
-              </div>
-            )}
-          </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+
+      const renderEmptyView = () => (
+        <div className="emptyViewContainer">
+          <img
+            src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-empty-cart-img.png"
+            className="emptyCartView"
+            alt="emptyView"
+          />
+          <p>Your Cart is Empty</p>
+        </div>
+      )
+
+      return (
+        <>
+          <Header restaurantName={state} />
+          {cartLength === 0 ? renderEmptyView() : renderCartListView()}
         </>
       )
     }}

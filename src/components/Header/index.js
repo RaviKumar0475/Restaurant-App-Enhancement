@@ -1,84 +1,49 @@
 import {Link, withRouter} from 'react-router-dom'
+import {AiOutlineShoppingCart} from 'react-icons/ai'
 import Cookies from 'js-cookie'
-
 import CartContext from '../../context/CartContext'
 
 import './index.css'
 
-const Header = props => {
-  const {restaurantName} = props
-  const onClickLogout = () => {
-    const {history} = props
-    Cookies.remove('jwt_token')
-    history.replace('/login')
-  }
+const Header = props => (
+  <CartContext.Consumer>
+    {context => {
+      const {cartList} = context
+      const onLogout = () => {
+        Cookies.remove('jwt_token')
+        const {history} = props
+        history.replace('/login')
+      }
 
-  const renderCartItemsCount = () => (
-    <CartContext.Consumer>
-      {value => {
-        const {cartList} = value
-        const cartItemsCount = cartList.length
-
-        return (
-          <>
-            {cartItemsCount > 0 ? (
-              <span className="cart-count-badge">{cartList.length}</span>
-            ) : null}
-          </>
-        )
-      }}
-    </CartContext.Consumer>
-  )
-
-  return (
-    <nav className="nav-header">
-      <div className="nav-content">
-        <div className="nav-bar-large-container">
-          <Link to="/">{restaurantName}</Link>
-          <ul className="nav-menu">
-            <li className="nav-menu-item">
-              <Link to="/cart" className="nav-link">
-                <p>My Orders</p>
-                🛒
-                {renderCartItemsCount()}
-              </Link>
-            </li>
-          </ul>
-          <button
-            type="button"
-            className="logout-desktop-btn"
-            onClick={onClickLogout}
-          >
-            Logout
-          </button>
+      const {restaurantName} = props
+      const {match} = props
+      const {path} = match
+      // const chosenHome = path === '/' ? 'chosenLink' : null
+      const chosenCart = path === '/cart' ? 'chosenLink' : null
+      return (
+        <div className="bg-container">
+          <Link to="/" className="link">
+            <h1 className="heading">{restaurantName}</h1>
+          </Link>
+          <div className="card_container">
+            <p className="my_order">My Orders</p>
+            <Link
+              to={{pathname: '/cart', state: restaurantName}}
+              className="link"
+            >
+              <button type="button" className="cartButton">
+                <AiOutlineShoppingCart className={`icon_cart ${chosenCart}`} />
+              </button>
+            </Link>
+            <p className="background">{cartList.length}</p>
+            <button type="button" className="buttonLogout" onClick={onLogout}>
+              Logout
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="nav-menu-mobile">
-        <ul className="nav-menu-list-mobile">
-          <li className="nav-menu-item-mobile">
-            <Link to="/" className="nav-link">
-              <img
-                src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-home-icon.png"
-                alt="nav home"
-                className="nav-bar-img"
-              />
-            </Link>
-          </li>
-
-          <li className="nav-menu-item-mobile">
-            <Link to="/cart" className="nav-link">
-              <img
-                src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-cart-icon.png"
-                alt="nav cart"
-                className="nav-bar-img"
-              />
-              {renderCartItemsCount()}
-            </Link>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  )
-}
+      )
+    }}
+  </CartContext.Consumer>
+)
 
 export default withRouter(Header)
